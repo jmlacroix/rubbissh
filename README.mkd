@@ -1,0 +1,47 @@
+`sshit` is a ruby script that generates a ssh `config` file from a YAML definition.
+
+## Installation ##
+
+* Copy `sshit.rb` and `config.yml` in your `~/.ssh/` folder.
+* Edit `config.yml` to suit your needs.
+* Run `sshit.rb` to generate your config file.
+
+I use an alias for quick refreshes: `alias sshit="$(which ruby) ~/.ssh/sshit.rb"`
+
+## Example config ##
+
+`config.yml`
+
+	*:
+	  server_alive_interval: 30
+	  server_alive_count_max: 120
+
+	dev-:
+	  *:
+	    user: bobby
+	    port: 1221
+
+	  website: my-web-host.com
+	  database:
+	    host_name: my-db-host.com
+	    identity_file: ~/ident.key
+
+`config.out`
+
+	Host *
+		ServerAliveCountMax	120
+		ServerAliveInterval	30
+	Host dev-*
+		User	bobby
+		Port	1221
+	Host dev-database
+		HostName	my-db-host.com
+		IdentityFile	~/ident.key
+	Host dev-website
+		HostName	my-web-host.com
+
+## Config details ##
+
+- Use the `*` wildcard to define keywords for all machines under the current level.
+- Use the `-` symbol after a machine name to create a server group.
+- By default, `sshit` generates a `config.out` file. Edit `sshit.rb` to customize the output path.

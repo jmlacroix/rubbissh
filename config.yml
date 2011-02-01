@@ -1,0 +1,13 @@
+*:
+  server_alive_interval: 30
+  server_alive_count_max: 120
+
+dev-:
+  *:
+    user: bobby
+    port: 1221
+
+  website: my-web-host.com
+  database:
+    host_name: my-db-host.com
+    identity_file: ~/ident.key

@@ -1,11 +1,13 @@
 require 'yaml'
 
-CONFIG_IN     = File.join(File.dirname(__FILE__), "config.yml")
-CONFIG_OUT    = File.join(File.dirname(__FILE__), "config.out")
+CONFIG_IN  = File.join(File.dirname(__FILE__), "config.yml")
+CONFIG_OUT = File.join(File.dirname(__FILE__), "config.out")
 
-SYM  = '-'
-WILD = '*'
-DEF  = 'host_name'
+SYMBOL    = '-'
+WILDCARD  = '*'
+DEFAULT   = 'host_name'
+INDENT    = "\t"
+SEPARATOR = "\t"
 
 ENTRIES = []
 
@@ -83,37 +85,60 @@ KEYWORDS = {
   :tunnel_device => "TunnelDevice"
 }
 
-def map_cfg(cfg)
-  cfg.inject({}) { |m, o| m[KEYWORDS[o[0].to_sym]] = o[1].to_s ; m }
+# map a rubyfied keywords hash real ssh keywords
+def map_keywords(keywords)
+  keywords.inject({}) do |out, keyvalue|
+    key, value = keyvalue
+    out.merge({ KEYWORDS[key.to_sym], value.to_s })
+  end
 end
 
-def parse_cfg(lvl, cfg)
-  if cfg.has_key? WILD
-    ENTRIES << [ (lvl + [WILD]).join(SYM), map_cfg(cfg.delete(WILD)) ]
+# add a host and its keywords into the entries list
+def add_entry(level, keywords)
+  ENTRIES << [
+    level.join(SYMBOL),
+    map_keywords(keywords)
+  ]
+end
+
+# parse the YAML config file recursively
+def parse_config(level, config)
+  if config.has_key? WILDCARD
+    add_entry level + [WILDCARD], config.delete(WILDCARD)
   end
 
-  cfg.each_pair do |slvl, scfg|
-    if slvl.end_with? SYM
-      parse_cfg(lvl + [slvl[0..-2]], scfg)
+  config.each_pair do |sublevel, subconfig|
+    if sublevel.end_with? SYMBOL
+      parse_config(level + [sublevel.chomp(SYMBOL)], subconfig)
     else
-      scfg = { DEF => scfg } if !scfg.is_a?(Hash)
-      ENTRIES << [ (lvl + [slvl]).join(SYM), map_cfg(scfg) ]
+      if !subconfig.is_a?(Hash)
+        subconfig = { DEFAULT => subconfig }
+      end
+      add_entry level + [sublevel], subconfig
     end
   end
 end
 
-def str_cfg
-  ENTRIES.inject([]) { |r, e|
-    r << [
-      'Host ' + e[0],
-      e[1].inject([]) { |sr, o| sr << "\t#{o[0].to_s}\t#{o[1].to_s}" }
+# transform the entries list in a classic ssh config
+def ssh_config
+  ENTRIES.inject([]) { |out, keyvalue|
+    host, keywords = keyvalue
+    out << [
+      'Host ' + host,
+      keywords.inject([]) do |subout, subkeyvalue|
+        key, value = subkeyvalue
+        subout << "#{INDENT}#{key.to_s}#{SEPARATOR}#{value.to_s}"
+      end
     ]
   }.join("\n")
 end
 
-def write_cfg
-  File.open(CONFIG_OUT, 'w') { |f| f.write(str_cfg + "\n") }
+# write the config into an out file
+def write_config
+  File.open(CONFIG_OUT, 'w') do |f|
+    f.write(ssh_config + "\n")
+  end
 end
 
-parse_cfg([], YAML.load_file(CONFIG_IN))
-write_cfg
+parse_config([], YAML.load_file(CONFIG_IN))
+write_config

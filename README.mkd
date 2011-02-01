@@ -1,12 +1,12 @@
-`sshit` is a ruby script that generates a ssh `config` file from a YAML definition.
+`rubbissh` is a ruby script that generates a ssh `config` file from a YAML definition.
 
 ## Installation ##
 
-* Copy `sshit.rb` and `config.yml` in your `~/.ssh/` folder.
+* Copy `rubbissh.rb` and `config.yml` in your `~/.ssh/` folder.
 * Edit `config.yml` to suit your needs.
-* Run `sshit.rb` to generate your config file.
+* Run `rubbissh.rb` to generate your config file.
 
-I use an alias for quick refreshes: `alias sshit="$(which ruby) ~/.ssh/sshit.rb"`
+I use an alias for quick refreshes: `alias rubbissh="$(which ruby) ~/.ssh/rubbissh.rb"`
 
 ## Example config ##
 
@@ -44,4 +44,4 @@ I use an alias for quick refreshes: `alias sshit="$(which ruby) ~/.ssh/sshit.rb"
 
 - Use the `*` wildcard to define keywords for all machines under the current level.
 - Use the `-` symbol after a machine name to create a server group.
-- By default, `sshit` generates a `config.out` file. Edit `sshit.rb` to customize the output path.
+- By default, `rubbissh` generates a `config.out` file. Edit `rubbissh.rb` to customize the output path.

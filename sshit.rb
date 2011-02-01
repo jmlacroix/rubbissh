@@ -1,7 +1,7 @@
 require 'yaml'
 
-CONFIG_IN     = ENV['HOME'] + '/.ssh/config.yml'
-CONFIG_OUT    = ENV['HOME'] + '/.ssh/config.out'
+CONFIG_IN     = File.join(File.dirname(__FILE__), "config.yml")
+CONFIG_OUT    = File.join(File.dirname(__FILE__), "config.out")
 
 SYM  = '-'
 WILD = '*'
